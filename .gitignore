@@ -1,0 +1,10 @@
+# python
+.venv/
+*.pyc
+__pycache__/
+
+# aws sam
+.aws-sam/
+
+# terraform
+.terraform/

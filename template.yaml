@@ -1,0 +1,62 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: A twitch.tv pomodoro timer widget.
+
+Globals:
+  Function:
+    Runtime: python3.8
+    Timeout: 10
+    MemorySize: 256
+
+Parameters:
+  Stage:
+    Type: String
+    AllowedValues:
+      - Dev
+      - Staging
+      - Prod
+    Description: The current development stage.
+
+Resources:
+  TomatinhoApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name:
+        Fn::Join:
+          - ''
+          - - 'TomatinhoApi'
+            - Ref: Stage
+      Description: 'The open api endpoint.'
+      OpenApiVersion: '2.0'
+      Cors: "'*'"
+      StageName:
+        Ref: Stage
+
+  GetUserFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/functions/tomatinho_api
+      Handler: get_user.handler
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action:
+                - 'ses:SendEmail'
+                - 'ses:SendTemplatedEmail'
+              Resource: '*'
+      Events:
+        HelloFunctionGet:
+          Type: Api
+          Properties:
+            Path: /user
+            Method: GET
+            RestApiId:
+              Ref: TomatinhoApi
+        HelloFunctionOptions:
+          Type: Api
+          Properties:
+            Path: /user
+            Method: OPTIONS
+            RestApiId:
+              Ref: TomatinhoApi
